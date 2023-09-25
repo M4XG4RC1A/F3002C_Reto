@@ -1,0 +1,147 @@
+#Modes related library
+print("Modes library ON");
+
+#Find main TE mode
+function mainTE(nmodes){
+    #Verify nmodes>0
+    if(nmodes<=0){print("No modes");return 0;}    
+    
+    ##Start work variables    
+    #TE polarization min/max variables
+    maxTE=0;
+    
+    #Index Variables
+    iTE=0;
+    
+    #Read mode TE polarization fraction
+    for(i=[nmodes:-1:1]){
+        TE = getdata("FDE::data::mode"+num2str(i),"TE polarization fraction");
+        if(maxTE<TE){iTE=i;maxTE=TE;}
+    }
+    return TE={"i": iTE,"fraction": maxTE};
+}
+
+#Find main TM mode
+function mainTM(nmodes){
+    ##Start work variables    
+    #TM polarization min/max variables
+    maxTM=0;
+    
+    #Index Variables
+    iTM=0;
+    
+    #Read mode TE/TM polarization fraction
+    for(i=[nmodes:-1:1]){
+        TE = getdata("FDE::data::mode"+num2str(i),"TE polarization fraction");
+        if(maxTM<1-TE){iTM=i;maxTM=1-TE;}
+    }
+    
+    return TM={"i": iTM,"fraction": maxTM};
+}
+
+#Create Gaussian
+function createGaussian(overlapData,waveguide,fde){
+    #clear dcard    
+    cleardcard;
+    
+    #create gaussian
+    setanalysis("use fully vectorial thin lens beam profile", 0);    
+    setanalysis("beam direction",overlapData.direction);
+    setanalysis("define gaussian beam by",overlapData.define);
+    setanalysis("waist radius",min([waveguide.width,waveguide.height])*1e-6);
+    setanalysis("refractive index",overlapData.n);
+    setanalysis("sample span",(waveguide.height+fde.out)*1e-6);
+    setanalysis("sample resolution",overlapData.resolution);
+    createbeam;
+}
+
+#Find main TE mode
+function mainOverlapTE(nmodes){
+    #set shift
+    setanalysis("shift d-card center",1);
+    
+    ##Start work variables    
+    #TE polarization min/max variables
+    maxTE=0;
+    maxPower=0;
+    
+    #Index Variables
+    iTE=0;
+    
+    #Read mode TE polarization fraction
+    for(i=[1:nmodes]){
+        shift = optimizeposition(i,1);
+        TE = overlap("mode"+num2str(i),"gaussian1",shift(1),shift(2),shift(3));
+        if(maxTE<TE(1)){iTE=i;maxTE=TE(1);maxPower=TE(2);}
+    }
+    return TE={"i": iTE,"fraction": maxTE,"power": maxPower};
+}
+
+#Find main TM mode
+function mainOverlapTM(nmodes){
+    #set shift
+    setanalysis("shift d-card center",1);
+    
+    ##Start work variables    
+    #TE polarization min/max variables
+    maxTM=0;
+    maxPower=0;
+    
+    #Index Variables
+    iTM=0;
+    
+    #Read mode TM polarization fraction
+    for(i=[1:nmodes]){
+        shift = optimizeposition(i,1);
+        TM = 1-overlap("mode"+num2str(i),"gaussian1",shift(1),shift(2),shift(3));
+        if(maxTM<TM(1)){iTM=i;maxTM=TM(1);maxPower=TM(2);}
+    }
+    return TM={"i": iTM,"fraction": maxTM,"power": maxPower};
+}
+
+function getCompactModel(wavelength0){
+    # Get the data from the MODE frequency sweep
+    lambda=c/getdata("FDE::data::frequencysweep","f")*1e6; # lambda in [microns]
+    
+    neff=abs(getdata("FDE::data::frequencysweep","neff"));
+    lambda0 = wavelength0;  # central wavelength
+    
+    # Polynomial fitting. 
+    x_fit = lambda-lambda0; # X vector 
+    y_fit = neff;           # Y vector 
+    n_fit = 2;              # order of the polynomial
+    
+    # Next 3 lines do polyfit. Inputs: x_fit, y_fit, n_fit. Outputs: a_fit.
+    # Based on a linear algebra approach
+    X_fit = matrix(length(x_fit),n_fit+1);
+    for(i_fit=0:n_fit){ X_fit(1:length(x_fit),i_fit+1) = x_fit^i_fit; }
+    a_fit = mult(mult(inv(mult(transpose(X_fit),X_fit)),transpose(X_fit)),y_fit);
+    
+    #Set equation in text
+    ec = num2str(a_fit(1))+"+"+num2str(a_fit(2))+"(l-"+num2str(lambda0)+")+"+num2str(a_fit(3))+"(l-"+num2str(lambda0)+")^2";
+    
+    # This is the polynomial equation:
+    Y_fit_result = a_fit(1) + a_fit(2)*(lambda-lambda0) + a_fit(3)*(lambda-lambda0)^2;
+    
+    #plot (lambda, neff, "lambda", "neff", ec, "plot type=line, color=red, pen=-, linewidth=2");  # plot the result
+    #holdon;    
+    #plot (lambda,  Y_fit_result, "lambda", "neff", ec, "plot type=line, color=blue, pen=-., linewidth=2");  # plot the result    
+    #legend("neff","Fit");
+    #holdoff;
+    
+    return {"indexes": a_fit, "ec": ec, "fit":Y_fit_result};
+}
+
+#Print max TE mode
+function printMaxTE(iTE,maxTE){
+    print("Max TE:");
+    print(" Mode: "+num2str(iTE));
+    print(" Fraction: "+num2str(maxTE*100));
+}
+
+#print max TM mode
+function printMaxTM(iTM,maxTM){
+    print("Max TM:");
+    print(" Mode: "+num2str(iTM));
+    print(" Fraction: "+num2str(maxTM*100));
+}
