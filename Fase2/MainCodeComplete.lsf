@@ -24,8 +24,8 @@ wafer = {"name": "Si",
       "length": 1};
 #Properties for mesh FDE
 meshFDE = {"name": "FDE",
-      "xDef": 40,
-      "yDef": 40,
+      "xDef": 100,
+      "yDef": 100,
       "out": 1};
 #Properties for FDE Modal Analysis (in range, near, max)
 FDE = {"wavelength": 1.55,

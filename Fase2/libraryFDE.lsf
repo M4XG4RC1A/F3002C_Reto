@@ -79,13 +79,6 @@ function saveMode(nmodes,mode,folder,name,data){
     neff = getdata("FDE::data::mode"+num2str(mode),"neff");
     ng = getdata("FDE::data::mode"+num2str(mode),"ng");
     TE = getdata("FDE::data::mode"+num2str(mode),"TE polarization fraction");
-    dataEx = getdata("FDE::data::mode"+num2str(mode),"Ex");
-    dataEy = getdata("FDE::data::mode"+num2str(mode),"Ey");
-    dataEz = getdata("FDE::data::mode"+num2str(mode),"Ez");
-    intE = abs(dataEx)^2+abs(dataEy)^2+abs(dataEz)^2;
-    dataX = getdata("FDE::data::mode"+num2str(mode),"x");
-    dataY = getdata("FDE::data::mode"+num2str(mode),"y");
-    dataZ = getdata("FDE::data::mode"+num2str(mode),"z");
     
     #Storage results data
     E = getresult("FDE::data::mode"+num2str(mode),"E");
@@ -93,9 +86,9 @@ function saveMode(nmodes,mode,folder,name,data){
     P = getresult("FDE::data::mode"+num2str(mode),"P");
     
     #Save data as lumerical type
-    if(data.lumerical){ savedata("./"+folder+"/"+name,nmodes,neff,ng,TE,dataEx,dataEy,dataEx,intE,dataX,dataY,dataZ,E,H,P); }
+    if(data.lumerical){ savedata("./"+folder+"/"+name,nmodes,neff,ng,TE,E,H,P); }
     #Save data as matlab type    
-    if(data.matlab){ matlabsave("./"+folder+"/"+name,nmodes,neff,ng,TE,dataEx,dataEy,dataEx,intE,dataX,dataY,dataZ,E,H,P); }
+    if(data.matlab){ matlabsave("./"+folder+"/"+name,nmodes,neff,ng,TE,E,H,P); }
     #Save data images    
     if(data.model){
         image(dataX*1e6,dataY*1e6,intE,"x(microns)","y(microns)","Compact Model");
@@ -111,13 +104,6 @@ function saveModeOverlap(nmodes,modeOverlap,folder,name,data){
     neff = getdata("FDE::data::mode"+num2str(mode),"neff");
     ng = getdata("FDE::data::mode"+num2str(mode),"ng");
     TE = getdata("FDE::data::mode"+num2str(mode),"TE polarization fraction");
-    dataEx = getdata("FDE::data::mode"+num2str(mode),"Ex");
-    dataEy = getdata("FDE::data::mode"+num2str(mode),"Ey");
-    dataEz = getdata("FDE::data::mode"+num2str(mode),"Ez");
-    intE = abs(dataEx)^2+abs(dataEy)^2+abs(dataEz)^2;
-    dataX = getdata("FDE::data::mode"+num2str(mode),"x");
-    dataY = getdata("FDE::data::mode"+num2str(mode),"y");
-    dataZ = getdata("FDE::data::mode"+num2str(mode),"z");
     
     #Storage results data
     E = getresult("FDE::data::mode"+num2str(mode),"E");
@@ -125,9 +111,9 @@ function saveModeOverlap(nmodes,modeOverlap,folder,name,data){
     P = getresult("FDE::data::mode"+num2str(mode),"P");
     
     #Save data as lumerical type
-    if(data.lumerical){ savedata("./"+folder+"/"+name,nmodes,modeOverlap,neff,ng,TE,dataEx,dataEy,dataEx,intE,dataX,dataY,dataZ,E,H,P); }
+    if(data.lumerical){ savedata("./"+folder+"/"+name,nmodes,modeOverlap,neff,ng,TE,E,H,P); }
     #Save data as matlab type    
-    if(data.matlab){ matlabsave("./"+folder+"/"+name,nmodes,modeOverlap,neff,ng,TE,dataEx,dataEy,dataEx,intE,dataX,dataY,dataZ,E,H,P); }
+    if(data.matlab){ matlabsave("./"+folder+"/"+name,nmodes,modeOverlap,neff,ng,TE,E,H,P); }
     #Save data images    
     if(data.model){
         image(dataX*1e6,dataY*1e6,intE,"x(microns)","y(microns)","Compact Model");
