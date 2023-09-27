@@ -92,7 +92,7 @@ for (l=lambs){
                 print("Modes>0, Modes:"+num2str(nmodes));
                 
                 #Save data
-                for(m=nmodes){
+                for(m=1:nmodes){
                     saveModes(m,"Modes","Waveguide"+num2str(x*1000)+"_"+num2str(y*1000)+"_"+num2str(l*1000)+"_Mode"+num2str(m),SaveTypes);
                 }
                 closeall;
