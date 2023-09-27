@@ -62,7 +62,7 @@ prepareFDE(FDE);
 
 ##Analysis
 #Set wavelengths to study
-lambs = linspace(1.530,1.580,3); #1530-1580
+lambs = linspace(1.555,1.580,2); #1530-1580
 #Diferent Sizes (largoxalto)
 wgX = linspace(0.825,1,5);#linspace(0.1,1,5)-8
 wgY = linspace(0.775,1,5);#linspace(0.1,1,5)-10
@@ -86,16 +86,18 @@ for (l=lambs){
                         
             #Calculate modes
             nmodes = runModes();
-            matlabsave("./Modes/Waveguide"+num2str(x*1000000)+"_"+num2str(y*1000000)+"_"+num2str(l*1000000),nmodes);
+            matlabsave("./nModes/Waveguide"+num2str(x*1000000)+"_"+num2str(y*1000000)+"_"+num2str(l*1000),nmodes);
+            print("Waveguide"+num2str(x*1000000)+"_"+num2str(y*1000000)+"_"+num2str(l*1000));
             
             if(nmodes!=0){
                 print("Modes>0, Modes:"+num2str(nmodes));
                 
                 #Save data
                 for(m=1:nmodes){
-                    saveModes(m,"Modes","Waveguide"+num2str(x*1000000)+"_"+num2str(y*1000000)+"_"+num2str(l*1000000)+"_Mode"+num2str(m),SaveTypes);
+                    saveModes(m,"Modes","Waveguide"+num2str(x*1000000)+"_"+num2str(y*1000000)+"_"+num2str(l*1000)+"_Mode"+num2str(m),SaveTypes);
+                    closeall;
                 }
-                closeall;
+                
             }else{
                 print("No modes");
             }
