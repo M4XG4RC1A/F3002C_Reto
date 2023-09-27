@@ -22,6 +22,7 @@ def create_taylor_approximation(polynomial, center, order=30):
         taylor_coefficients.append(taylor_coefficient)
     return np.poly1d(taylor_coefficients[::-1])
 
+
 def plot_approximation(lambda_values, neff_values, lambda_range, original_values, taylor_values, ylabel, title):
     """Plot the original data, fitted polynomial, and Taylor approximation."""
     plt.figure(figsize=(12, 6))
@@ -40,7 +41,6 @@ def k_lambda(lambda_val, coefficients):
     """Compute the propagation constant for given lambda values using polynomial coefficients."""
     neff = np.polyval(coefficients, lambda_val)
     return (2 * np.pi * neff) / lambda_val
-
 
 
 def compute_k_l(path):
@@ -70,20 +70,31 @@ def compute_k_l(path):
     # Plot K(lambda) approximation
     plot_approximation(lambda_values, K_values, lambda_range, K_original, K_taylor, 'K(Lambda)', 'Taylor Polynomial Approximation of K(Lambda)')
 
+
+    """
+
+    Begin 3d arrangement of DK 
+    
+    """
+
+
     # Lambda arrangements
-    lamp = np.linspace(0.7, 2.5, 3000)
-    lams = np.linspace(0.7, 2.5, 3000)
+    lamp = np.linspace(0.7, 1.7, 30)
+    lams = np.linspace(0.7, 1.7, 30)
+    lamr = np.linspace(0.7, 1.7, 30)
 
     # Lambda Meshgrids
-    LAMP, LAMS = np.meshgrid(lamp, lams)
-    LAMI = 1. / (2. / LAMP - 1. / LAMS)
+    LAMP, LAMS, LAMR = np.meshgrid(lamp, lams, lamr)
+
+    LAMI = 1. / (2. / LAMP - 1. / LAMS - 1. / LAMR)
 
     # Propagation constants for each field
     kp = k_lambda(LAMP, coefficients)
     ks = k_lambda(LAMS, coefficients)
+    kr = k_lambda(LAMR, coefficients)
     ki = k_lambda(LAMI, coefficients)
 
-    return kp, ks, ki, lamp, lams
+    return kp, ks, kr, ki, lamp, lams, lamr
 
 
 # bueno
@@ -98,21 +109,48 @@ pathTE = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/SweepOverlapTE/Wav
 
 
 # Phase mismatch
-kp_TE, ks_TE, ki_TE, lamp, lams = compute_k_l(pathTE)
+kp, ks, ki, kr, lamp, lams, lamr = compute_k_l(pathTE)
 #kp_TM, ks_TM, ki_TM = compute_k_l(pathTM)
 
-DK_TE = kp_TE + kp_TE - ks_TE - ki_TE - 1e-6
+DK_TE = kp + kp - ks - kr - ki - 1e-6
 
-# Check the shape and a sample value to ensure calculations are correct
-DK_TE.shape, DK_TE[1000, 1000]
+# # Check the shape and a sample value to ensure calculations are correct
+# DK_TE.shape, DK_TE[30, 30, 30]
 
 # Plotting the contour for DK_TE without the colorbar
 plt.figure(figsize=(10, 8))
-plt.contour(lamp, lams, DK_TE, [0], colors='b', linewidths=2)
+
+# Plot 3D surface
+plt.contour(lamp, lams, DK_TE[:, 15, :], 100, cmap='jet')
+
+
 plt.title('Contour plot of Phase Mismatch (DK_TE)')
 plt.xlabel('lamp')
 plt.ylabel('lams')
 plt.grid(True)
 plt.tight_layout()
 plt.show()
+
+
+
+# # Phase mismatch
+# kp, ks, ki, kr, lamp, lams, lamr = compute_k_l(pathTE)
+# #kp_TM, ks_TM, ki_TM = compute_k_l(pathTM)
+
+# DK_TE = kp + kp - ks - kr - ki - 1e-6
+
+# # # Check the shape and a sample value to ensure calculations are correct
+# # DK_TE.shape, DK_TE[30, 30, 30]
+
+# # Plotting the contour for DK_TE without the colorbar
+# fig = plt.figure(figsize=(10, 8))
+# ax = fig.add_subplot(111, projection="3d")
+# ax.plot_surface(lamr, lams, DK_TE, cmap="autumn_r", lw=0, rstride=1, cstride=1)
+
+# ax.title('Contour plot of Phase Mismatch (DK_TE)')
+# ax.xlabel('lamp')
+# ax.ylabel('lams')
+# ax.grid(True)
+# ax.tight_layout()
+# plt.show()
 
