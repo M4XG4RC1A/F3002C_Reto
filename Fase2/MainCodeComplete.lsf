@@ -72,7 +72,7 @@ progress=0;
 for (l=lambs){
     for (x=wgX){
         for (y=wgY){
-        print("Progress: "+num2str(progress/150)+"%")
+        print("Progress: "+num2str(progress/75)+"%");
         try {    
             print("Running x:"+num2str(x)+", y:"+num2str(y)+", l:"+num2str(l));
             #Change dimensions
@@ -93,7 +93,7 @@ for (l=lambs){
                 
                 #Save data
                 for(m=nmodes){
-                    saveModeSimple("Modes","Waveguide"+num2str(x*1000)+"_"+num2str(y*1000)+"_"+num2str(l*1000),SaveTypes);
+                    saveModes(m,"Modes","Waveguide"+num2str(x*1000)+"_"+num2str(y*1000)+"_"+num2str(l*1000)+"_Mode"+num2str(m),SaveTypes);
                 }
                 closeall;
             }else{

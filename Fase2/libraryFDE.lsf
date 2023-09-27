@@ -159,9 +159,7 @@ function saveSweep(wavelength,folder,name,data){
 }
 
 #Saves Mode simple with overlap
-function saveModes(modeOverlap,folder,name,data){
-    #Get mode
-    mode = modeOverlap.i;
+function saveModes(mode,folder,name,data){
         
     #Storage mode data in variables    
     ng = getdata("FDE::data::mode"+num2str(mode),"ng");
