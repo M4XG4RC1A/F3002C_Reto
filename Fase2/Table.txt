@@ -1,0 +1,28 @@
+\begin{table}[H]\centering
+\resizebox{0.45\textwidth}{!}{
+  \begin{tabular}{rr|ccccc|ll}
+     & &\multicolumn{5}{c}{Wg_x}\\
+     & &825nm&868.75nm&912.5nm&956.25nm&1000nm\\ \cline{1-9} \\[-1em]
+     \multirow{15}{*}{Wg_y}&\multirow{3}{*}{775nm}&0&0&0&0&0&1530nm&\multirow{15}{*}{$\lambda$}\\
+&&0&0&0&0&0&1555nm\\
+&&0&0&0&0&0&1580nm\\
+\cline{2-8} \\[-1em]
+&\multirow{3}{*}{831.25nm}&0&0&0&0&0&1530nm\\
+&&0&0&0&0&0&1555nm\\
+&&0&0&0&0&0&1580nm\\
+\cline{2-8} \\[-1em]
+&\multirow{3}{*}{887.5nm}&0&0&0&0&0&1530nm\\
+&&0&0&0&0&0&1555nm\\
+&&0&0&0&0&0&1580nm\\
+\cline{2-8} \\[-1em]
+&\multirow{3}{*}{943.75nm}&0&0&0&0&0&1530nm\\
+&&0&0&0&0&0&1555nm\\
+&&0&0&0&0&0&1580nm\\
+\cline{2-8} \\[-1em]
+&\multirow{3}{*}{1000nm}&0&0&0&0&0&1530nm\\
+&&0&0&0&0&0&1555nm\\
+&&0&0&0&0&0&1580nm\\
+\cline{2-8} \\[-1em]
+ \end{tabular}}
+ \caption{Tabla de numero de modos para cada guía simulada a diferentes longitudes de onda} \label{table5_1}
+\end{table}

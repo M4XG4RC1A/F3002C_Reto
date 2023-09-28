@@ -28,6 +28,7 @@ fprintf(fileID,'%s\n',strLine);
 firstStrStart = "     \multirow{"+num2str(lenL*lenY)+"}{*}{Wg_y}";
 endStrLine = "&\multirow{"+num2str(lenL*lenY)+"}{*}{$\lambda$}";
 
+nmodes = 0;
 for y = Ys
     strLine = firstStrStart+"&\multirow{"+num2str(lenL)+"}{*}{"+num2str(y)+"nm}";
     for l = Ls
@@ -35,7 +36,7 @@ for y = Ys
             %load("./Modes/Waveguide"+string(x)+"_"+string(y)+"_"+string(l)+".mat");
             strLine = strLine+"&"+num2str(nmodes);
         end
-        strLine = strLine+endStrLine+"\\";
+        strLine = strLine+"&"+num2str(l)+"nm"+endStrLine+"\\";
         fprintf(fileID,'%s\n',strLine);
         strLine = "&";
         endStrLine="";

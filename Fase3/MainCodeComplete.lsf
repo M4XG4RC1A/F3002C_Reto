@@ -1,0 +1,117 @@
+##Main Study Script
+
+##Include libraries
+libraryModes;
+libraryGeometry;
+libraryMesh;
+libraryFDE;
+
+##Values of study
+finalX = 1000;
+finalY = 800;
+studyPoints = 100;
+
+##Define Structures
+#Properties for waveguide component (Si3N4)
+wg = {"name": "Si3N4",
+      "width": finalX,
+      "height": finalY,
+      "length": 1};
+#Properties for base component (SiO2)
+base = {"name": "SiO2",
+      "width": 7,
+      "height": 2,
+      "length": 1};
+#Properties for wafer component (Si)
+wafer = {"name": "Si",
+      "width": 7,
+      "height": 2,
+      "length": 1};
+#Properties for mesh FDE
+meshFDE = {"name": "FDE",
+      "xDef": 100,
+      "yDef": 100,
+      "out": 1};
+#Properties for FDE Modal Analysis (in range, near, max)
+FDE = {"wavelength": 1.58,
+      "nsearch": "near",
+      "n1": 2.2,
+      "n2": 1.4};
+#Properties for FDE Sweep Analysis single
+singleSweep = {"type": "wavelength",
+        "stop": 0.51,
+        "points": studyPoints,
+        "mode": 1,
+        "modes": 8};
+#Save data types
+SaveTypes = {"lumerical": true,
+        "matlab": true,
+        "model": true};
+#Create overlap beam
+overlapBeam = {"direction": "2D Z normal",
+               "define": "waist size and position",
+               "n": 2.02,
+               "resolution": 200};
+               
+##Set geometries
+#Set layout
+switchtolayout;
+#Modify geometry to start data
+centerWG(wg,base,wafer);
+#Modify mesh and center
+centerMesh(meshFDE,wg);
+#Prepare FDE Solver
+prepareFDE(FDE);
+#Prepare Sweep Analysis
+#prepareSingleSweep(singleSweep);
+
+#Get overlapTE
+
+
+##Analysis
+#Set wavelengths to study
+lambs = linspace(1.530,1.580,3); #1530-1580
+#Diferent Sizes (largoxalto)
+wgX = linspace(0.825,1,5);#linspace(0.1,1,5)-8
+wgY = linspace(0.775,1,5);#linspace(0.1,1,5)-10
+
+progress=0;
+
+for (l=lambs){
+    for (x=wgX){
+        for (y=wgY){
+        print("Progress: "+num2str(progress/75)+"%");
+        try {    
+            print("Running x:"+num2str(x)+", y:"+num2str(y)+", l:"+num2str(l));
+            #Change dimensions
+            wg.width = x;
+            wg.height = y;
+            FDE.wavelength = l;
+            #Prepare geometry and Mesh
+            centerWG(wg,base,wafer);
+            centerMesh(meshFDE,wg);
+            prepareFDE(FDE);
+                        
+            #Calculate modes
+            nmodes = runModes();
+            matlabsave("./Modes/Waveguide"+num2str(x*1000000)+"_"+num2str(y*1000000)+"_"+num2str(l*1000000),nmodes);
+            
+            if(nmodes!=0){
+                print("Modes>0, Modes:"+num2str(nmodes));
+                
+                #Save data
+                for(m=1:nmodes){
+                    saveModes(m,"Modes","Waveguide"+num2str(x*1000000)+"_"+num2str(y*1000000)+"_"+num2str(l*1000000)+"_Mode"+num2str(m),SaveTypes);
+                }
+                closeall;
+            }else{
+                print("No modes");
+            }
+        }
+        progress = progress+1;
+        }
+    }
+}
+
+print("Finish");
+

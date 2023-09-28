@@ -1,0 +1,24 @@
+#Mesh related library
+print("Mesh library ON");
+
+#Modify rectangle object
+function modFDE(fde,wg,pos){
+    switchtolayout;
+    #Set Coordinates    
+    setnamed(fde.name,"x",pos(1)*1e-6);
+    setnamed(fde.name,"y",pos(2)*1e-6);
+    setnamed(fde.name,"z",pos(3)*1e-6);
+    
+    #Set sizes    
+    setnamed(fde.name,"x span",(wg.width+2*fde.out)*1e-6);
+    setnamed(fde.name,"y span",(wg.height+2*fde.out)*1e-6);
+    
+    #Set resolution
+    setnamed(fde.name,"mesh cells x",(wg.width+2*fde.out)*fde.xDef);
+    setnamed(fde.name,"mesh cells y",(wg.height+2*fde.out)*fde.yDef);
+}
+
+#Modify center mesh
+function centerMesh(fde,wg){
+    modFDE(fde,wg,[0,0,0]);
+}
