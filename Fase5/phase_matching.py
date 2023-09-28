@@ -22,6 +22,62 @@ def create_taylor_approximation(polynomial, center, order=30):
         taylor_coefficients.append(taylor_coefficient)
     return np.poly1d(taylor_coefficients[::-1])
 
+def pade_coefficients(taylor_coeffs, m, n):
+    """
+    Compute the Pade approximation coefficients for a given Taylor series.
+    
+    Parameters:
+    - taylor_coeffs: Coefficients of the Taylor series, starting from the 0th degree term.
+    - m: Degree of the numerator polynomial P(x).
+    - n: Degree of the denominator polynomial Q(x).
+    
+    Returns:
+    - p_coeffs: Coefficients of the numerator polynomial P(x).
+    - q_coeffs: Coefficients of the denominator polynomial Q(x).
+    """
+    
+    # Total number of coefficients in the Pade approximation
+    N = m + n + 1
+    
+    # Ensure we have enough Taylor coefficients
+    if len(taylor_coeffs) < N:
+        raise ValueError("Not enough Taylor coefficients provided.")
+    
+    # Construct the matrix A and vector B for Ax = B
+    L = np.zeros((N, N))
+    R = np.zeros(N)
+
+    # First vector L is filled with 0
+    for i in range(N):
+        L[i] = 0
+    # Matrix R is divided in two sections, first section
+    # C_n+1 to C_2n
+    # B_1 to B_n
+    for i in range(N):
+        for j in range(N):
+            R[i, j] = taylor_coeffs[n+i-j]
+
+    # Solve for B_n
+    B = np.linalg.solve(L, R)
+    print(B)
+
+
+
+    # 
+    # 0 to A
+    # 0 to C_n  
+    # B_1 to B_n
+
+
+
+
+    # and C_n to C_2n
+
+
+    
+    
+
+
 def plot_approximation(lambda_values, neff_values, lambda_range, original_values, taylor_values, ylabel, title):
     """Plot the original data, fitted polynomial, and Taylor approximation."""
     plt.figure(figsize=(12, 6))
@@ -41,9 +97,26 @@ def k_lambda(lambda_val, coefficients):
     neff = np.polyval(coefficients, lambda_val)
     return (2 * np.pi * neff) / lambda_val
 
+def pade_lambda(lambda_val, p_coeffs, q_coeffs):
+    """Compute the Pade approximation for given lambda values using polynomial coefficients."""
+    # Evaluate the numerator polynomial P(x) at lambda_val
+    p_value = np.polyval(p_coeffs, lambda_val)
+    
+    # Evaluate the denominator polynomial Q(x) at lambda_val
+    q_value = np.polyval(q_coeffs, lambda_val)
+    
+    # Compute the value of the Pade approximation at lambda_val
+    pade_value = p_value / q_value
+    
+    return pade_value
+
+
 
 
 def compute_k_l(path):
+
+    """ TAYLOR APPROXIMATION """
+
     neff_values, lambda_values = load_data_from_mat(path)
 
     # Fit polynomial
@@ -52,7 +125,7 @@ def compute_k_l(path):
     # Create Taylor approximation
     polynomial = np.poly1d(coefficients)
     center_lambda = (lambda_values.min() + lambda_values.max()) / 2
-    taylor_polynomial = create_taylor_approximation(polynomial, center_lambda)
+    taylor_polynomial = create_taylor_approximation(polynomial, center_lambda, order = 30)
 
     # Evaluate polynomials
     lambda_range = np.linspace(lambda_values.min(), lambda_values.max(), 500)
@@ -60,7 +133,7 @@ def compute_k_l(path):
     taylor_values = taylor_polynomial(lambda_range - center_lambda)
 
     # Plot Neff approximation
-    plot_approximation(lambda_values, neff_values, lambda_range, original_values, taylor_values, 'Neff', 'Taylor Polynomial Approximation of Neff')
+    #plot_approximation(lambda_values, neff_values, lambda_range, original_values, taylor_values, 'Neff', 'Taylor Polynomial Approximation of Neff')
 
     # Calculate K(lambda)
     K_values = (2 * np.pi * neff_values) / lambda_values
@@ -68,11 +141,35 @@ def compute_k_l(path):
     K_taylor = (2 * np.pi * taylor_values) / lambda_range
 
     # Plot K(lambda) approximation
-    plot_approximation(lambda_values, K_values, lambda_range, K_original, K_taylor, 'K(Lambda)', 'Taylor Polynomial Approximation of K(Lambda)')
+    #plot_approximation(lambda_values, K_values, lambda_range, K_original, K_taylor, 'K(Lambda)', 'Taylor Polynomial Approximation of K(Lambda)')
+
+
+    """ PADE APPROXIMATION LETS GOOOO """ 
+
+    #pade_coefficients(coefficients, int(30/2), int(30/2))
+    
+    # Evaluate polynomial
+    #lambda_range = np.linspace(lambda_values.min(), lambda_values.max(), 500)
+    #original_values = np.polyval(coefficients, lambda_range)
+    #pade_values = pade_lambda(lambda_range, p_coeff, q_coeff)
+
+    # Plot Neff approximation
+    #plot_approximation(lambda_values, neff_values, lambda_range, original_values, pade_values, 'Neff', 'Pade Polynomial Approximation of Neff')
+
+
+
+
+
+    """ PHASE MATHING COMPUTE """
+
+    LAMBDA_MIN = 0.3
+    LAMBDA_MAX = 2.3
+    POINTS = 3000
+
 
     # Lambda arrangements
-    lamp = np.linspace(0.7, 2.5, 3000)
-    lams = np.linspace(0.7, 2.5, 3000)
+    lamp = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
+    lams = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
 
     # Lambda Meshgrids
     LAMP, LAMS = np.meshgrid(lamp, lams)
@@ -82,6 +179,12 @@ def compute_k_l(path):
     kp = k_lambda(LAMP, coefficients)
     ks = k_lambda(LAMS, coefficients)
     ki = k_lambda(LAMI, coefficients)
+
+    # # Pade approximation for each field
+    # kp = pade_lambda(LAMP, p_coeff, q_coeff)
+    # ks = pade_lambda(LAMS, p_coeff, q_coeff)
+    # ki = pade_lambda(LAMI, p_coeff, q_coeff)
+
 
     return kp, ks, ki, lamp, lams
 

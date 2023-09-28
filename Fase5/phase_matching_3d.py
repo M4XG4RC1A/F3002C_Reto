@@ -43,7 +43,7 @@ def k_lambda(lambda_val, coefficients):
     return (2 * np.pi * neff) / lambda_val
 
 
-def compute_k_l(path):
+def compute_k_l(path, two_D=False):
     neff_values, lambda_values = load_data_from_mat(path)
 
     # Fit polynomial
@@ -60,15 +60,15 @@ def compute_k_l(path):
     taylor_values = taylor_polynomial(lambda_range - center_lambda)
 
     # Plot Neff approximation
-    plot_approximation(lambda_values, neff_values, lambda_range, original_values, taylor_values, 'Neff', 'Taylor Polynomial Approximation of Neff')
+    #plot_approximation(lambda_values, neff_values, lambda_range, original_values, taylor_values, 'Neff', 'Taylor Polynomial Approximation of Neff')
 
     # Calculate K(lambda)
-    K_values = (2 * np.pi * neff_values) / lambda_values
-    K_original = (2 * np.pi * original_values) / lambda_range
-    K_taylor = (2 * np.pi * taylor_values) / lambda_range
+    # K_values = (2 * np.pi * neff_values) / lambda_values
+    # K_original = (2 * np.pi * original_values) / lambda_range
+    # K_taylor = (2 * np.pi * taylor_values) / lambda_range
 
     # Plot K(lambda) approximation
-    plot_approximation(lambda_values, K_values, lambda_range, K_original, K_taylor, 'K(Lambda)', 'Taylor Polynomial Approximation of K(Lambda)')
+    #plot_approximation(lambda_values, K_values, lambda_range, K_original, K_taylor, 'K(Lambda)', 'Taylor Polynomial Approximation of K(Lambda)')
 
 
     """
@@ -76,23 +76,45 @@ def compute_k_l(path):
     Begin 3d arrangement of DK 
     
     """
+    LAMBDA_MIN = 0
+    LAMBDA_MAX = 3
+    POINTS = 300
 
+    if two_D:
+        # Lambda arrangements
+        lamp = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
+        lams = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
+        lamr = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
+
+        # Lambda Meshgrids
+        LAMP, LAMS = np.meshgrid(lamp, lams)
+
+        LAMI = 1. / (2. / LAMP - 1. / LAMS)
+        kp = k_lambda(LAMP, coefficients)
+        ks = k_lambda(LAMS, coefficients)
+        kr = k_lambda(LAMR, coefficients)
+        ki = k_lambda(LAMI, coefficients)
+
+        return kp, ks, ki, kr, lamp, lams, lamr
 
     # Lambda arrangements
-    lamp = np.linspace(0.7, 1.7, 30)
-    lams = np.linspace(0.7, 1.7, 30)
-    lamr = np.linspace(0.7, 1.7, 30)
+    lamp = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
+    lams = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
+    lamr = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
 
     # Lambda Meshgrids
     LAMP, LAMS, LAMR = np.meshgrid(lamp, lams, lamr)
 
-    LAMI = 1. / (2. / LAMP - 1. / LAMS - 1. / LAMR)
+    LAMI = 1. / (1. / LAMP - 1. / LAMS - 1. / LAMR)
 
     # Propagation constants for each field
     kp = k_lambda(LAMP, coefficients)
     ks = k_lambda(LAMS, coefficients)
     kr = k_lambda(LAMR, coefficients)
     ki = k_lambda(LAMI, coefficients)
+
+
+    
 
     return kp, ks, kr, ki, lamp, lams, lamr
 
@@ -112,7 +134,9 @@ pathTE = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/SweepOverlapTE/Wav
 kp, ks, ki, kr, lamp, lams, lamr = compute_k_l(pathTE)
 #kp_TM, ks_TM, ki_TM = compute_k_l(pathTM)
 
-DK_TE = kp + kp - ks - kr - ki - 1e-6
+DK_2d = kp + kp - ks - ki - 1e-6
+
+DK_3d = kp - ks - kr - ki - 1e-6
 
 # # Check the shape and a sample value to ensure calculations are correct
 # DK_TE.shape, DK_TE[30, 30, 30]
@@ -121,7 +145,12 @@ DK_TE = kp + kp - ks - kr - ki - 1e-6
 plt.figure(figsize=(10, 8))
 
 # Plot 3D surface
-plt.contour(lamp, lams, DK_TE[:, 15, :], 100, cmap='jet')
+#plt.contour(lamp, lams, DK_2d, [0], colors='b', linewidths=2)
+
+#plt.pcolormesh(lamp, lams, DK_3d[:, 15, :])
+plt.contour(lamp, lams, DK_3d[:, int(len(lams)/2), :], 0, colors='red')
+plt.contour(lamp, lams, DK_3d[:, int(len(lams)/3), :], 0, colors='blue')
+plt.contour(lamp, lams, DK_3d[:, int(2*len(lams)/3), :], 0, colors='blue')
 
 
 plt.title('Contour plot of Phase Mismatch (DK_TE)')
