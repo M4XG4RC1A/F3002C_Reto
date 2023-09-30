@@ -86,39 +86,49 @@ def pade_coefficients(taylor_coeffs, m, n):
     return A, B
     
 def eval_pade(x, p_coeffs, q_coeffs):
+
+    
+    numerator = p_coeffs[0]
+    for i in range(1,len(p_coeffs)):
+        numerator += p_coeffs[i] * pow(x,i)
+
     denominator = 1
-    for i in range(len(q_coeffs)):
-        denominator += q_coeffs[i] * x**i
-    numerator = 0
-    for i in range(len(p_coeffs)):
-        numerator += p_coeffs[i] * x**i
+    for i in range(0,len(q_coeffs)):
+        denominator += q_coeffs[i] * pow(x,i)
+
+
     return numerator / denominator
 
 
-f = lambda x : x**2 + 2*x + 1 + np.random.normal(0, 0.4, len(x))
+f = lambda x : np.sin(x) #+ np.random.normal(0, 0.1, len(x))
 
 x = np.linspace(0, 5, 10)
 y = f(x)
 
 
-order = 30
+order = 2
 
 coefficients = fit_polynomial(x, y, degree=order)
 polynomial = np.poly1d(coefficients)
 
-taylor = create_taylor_approximation(polynomial, 2, order=order)
-taylor_values = taylor(x-2)
+taylor = create_taylor_approximation(polynomial, 0, order=order)
+taylor_values = taylor(x)
 
-p_coefficients = pade_coefficients(coefficients, 1, 1)
+pade_Cn = pade_coefficients(coefficients, int(order/2), int(order/2))
+
+print(coefficients)
+print(pade_Cn)
 
 
-# print(p_coefficients)
-pade = eval_pade(x, p_coefficients[0], p_coefficients[1])
+# print(p_coefficients) 
+pade = eval_pade(x, pade_Cn[0], pade_Cn[1])
+
 
 
 
 
 plt.scatter(x,y)
-plt.plot(x, pade)
+plt.scatter(x, pade)
+plt.plot(x, taylor_values)
 plt.show()
 

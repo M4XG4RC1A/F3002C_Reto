@@ -1,46 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import h5py
-
-def load_data_from_mat(file_path):
-    """Load data from .mat file and return neff and lambda values."""
-    with h5py.File(file_path, 'r') as file:
-        neff_values = np.array(file['neff'][0])
-        lambda_values = np.array(file['lambda'][0])
-    return neff_values, lambda_values
-
-def fit_polynomial(lambda_values, neff_values, degree=30):
-    """Fit a polynomial of given degree and return coefficients."""
-    return np.polyfit(lambda_values, neff_values, degree)
-
-def create_taylor_approximation(polynomial, center, order=30):
-    """Create a Taylor polynomial approximation centered around a given value."""
-    taylor_coefficients = [polynomial(center)]
-    for i in range(1, order+1):
-        polynomial = np.polyder(polynomial)
-        taylor_coefficient = polynomial(center) / np.math.factorial(i)
-        taylor_coefficients.append(taylor_coefficient)
-    return np.poly1d(taylor_coefficients[::-1])
-
-
-def plot_approximation(lambda_values, neff_values, lambda_range, original_values, taylor_values, ylabel, title):
-    """Plot the original data, fitted polynomial, and Taylor approximation."""
-    plt.figure(figsize=(12, 6))
-    plt.plot(lambda_values, neff_values, 'o', label='Original Data')
-    plt.plot(lambda_range, original_values, '--', label='Fitted Polynomial')
-    plt.plot(lambda_range, taylor_values, '-', label='Taylor Approximation')
-    plt.xlabel('Lambda (um)')
-    plt.ylabel(ylabel)
-    plt.title(title)
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
-    plt.show()
-
-def k_lambda(lambda_val, coefficients):
-    """Compute the propagation constant for given lambda values using polynomial coefficients."""
-    neff = np.polyval(coefficients, lambda_val)
-    return (2 * np.pi * neff) / lambda_val
+from load_and_taylor import load_data_from_mat, fit_polynomial, create_taylor_approximation, plot_approximation, k_lambda
 
 
 def compute_k_l(path, two_D=False):
@@ -60,15 +21,15 @@ def compute_k_l(path, two_D=False):
     taylor_values = taylor_polynomial(lambda_range - center_lambda)
 
     # Plot Neff approximation
-    #plot_approximation(lambda_values, neff_values, lambda_range, original_values, taylor_values, 'Neff', 'Taylor Polynomial Approximation of Neff')
+    plot_approximation(lambda_values, neff_values, lambda_range, original_values, taylor_values, 'Neff', 'Taylor Polynomial Approximation of Neff')
 
-    # Calculate K(lambda)
+    #  # Calculate K(lambda)
     # K_values = (2 * np.pi * neff_values) / lambda_values
     # K_original = (2 * np.pi * original_values) / lambda_range
     # K_taylor = (2 * np.pi * taylor_values) / lambda_range
 
-    # Plot K(lambda) approximation
-    #plot_approximation(lambda_values, K_values, lambda_range, K_original, K_taylor, 'K(Lambda)', 'Taylor Polynomial Approximation of K(Lambda)')
+    # # Plot K(lambda) approximation
+    # plot_approximation(lambda_values, K_values, lambda_range, K_original, K_taylor, 'K(Lambda)', 'Taylor Polynomial Approximation of K(Lambda)')
 
 
     """
@@ -76,9 +37,9 @@ def compute_k_l(path, two_D=False):
     Begin 3d arrangement of DK 
     
     """
-    LAMBDA_MIN = 0
-    LAMBDA_MAX = 3
-    POINTS = 300
+    LAMBDA_MIN = 1
+    LAMBDA_MAX = 2.5
+    POINTS = 30
 
     if two_D:
         # Lambda arrangements
@@ -119,6 +80,27 @@ def compute_k_l(path, two_D=False):
     return kp, ks, kr, ki, lamp, lams, lamr
 
 
+def hex_to_rgb(value):
+    """Convert hex string to a tuple of RGB."""
+    value = value.lstrip('#')
+    length = len(value)
+    return tuple(int(value[i:i+length//3], 16) for i in range(0, length, length//3))
+
+def rgb_to_hex(rgb):
+    """Convert a tuple of RGB values to a hex string."""
+    return '#{:02x}{:02x}{:02x}'.format(*rgb)
+
+def interpolate_color(color1, color2, factor):
+    """Interpolate between two RGB colors."""
+    r1, g1, b1 = color1
+    r2, g2, b2 = color2
+    r = r1 + (r2 - r1) * factor
+    g = g1 + (g2 - g1) * factor
+    b = b1 + (b2 - b1) * factor
+    return int(r), int(g), int(b)
+
+
+
 # bueno
 pathTE = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/SweepOverlapTE/Waveguide1000_325_1580.mat'
 
@@ -128,8 +110,6 @@ pathTE = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/SweepOverlapTE/Wav
 
 #pathTM = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/TM/Waveguide1000_325_1555.mat'
 
-
-
 # Phase mismatch
 kp, ks, ki, kr, lamp, lams, lamr = compute_k_l(pathTE)
 #kp_TM, ks_TM, ki_TM = compute_k_l(pathTM)
@@ -138,19 +118,23 @@ DK_2d = kp + kp - ks - ki - 1e-6
 
 DK_3d = kp - ks - kr - ki - 1e-6
 
-# # Check the shape and a sample value to ensure calculations are correct
-# DK_TE.shape, DK_TE[30, 30, 30]
-
 # Plotting the contour for DK_TE without the colorbar
 plt.figure(figsize=(10, 8))
 
-# Plot 3D surface
-#plt.contour(lamp, lams, DK_2d, [0], colors='b', linewidths=2)
+start_color = hex_to_rgb("#FF0000")
+end_color = hex_to_rgb("#0000FF")
 
-#plt.pcolormesh(lamp, lams, DK_3d[:, 15, :])
-plt.contour(lamp, lams, DK_3d[:, int(len(lams)/2), :], 0, colors='red')
-plt.contour(lamp, lams, DK_3d[:, int(len(lams)/3), :], 0, colors='blue')
-plt.contour(lamp, lams, DK_3d[:, int(2*len(lams)/3), :], 0, colors='blue')
+n = 100
+for i in range(n):
+    slice_index = int(len(DK_3d)*i/n)
+    
+    # Get interpolated color
+    factor = i/n
+    rgb_color = interpolate_color(start_color, end_color, factor)
+    hex_color = rgb_to_hex(rgb_color)
+
+    # Here's your plotting line with the new color:
+    plt.contour(lamp, lams, DK_3d[:, slice_index, :], 0, colors=hex_color, linewidths=0.5)
 
 
 plt.title('Contour plot of Phase Mismatch (DK_TE)')
