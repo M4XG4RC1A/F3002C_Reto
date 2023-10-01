@@ -36,7 +36,7 @@ path = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/SweepOverlapTE/Waveg
 
 """ TAYLOR APPROXIMATION """
 
-#neff_values, lambda_values = load_data_from_mat(path)
+neff_values, lambda_values = load_data_from_mat(path)
 
 # Fit polynomial
 coefficients = fit_polynomial(lambda_values, neff_values)
@@ -98,8 +98,10 @@ sigma = 0.1e12
 lamp0 = 0.762
 NL = 0
 
+Ns = 1000
+
 omgp0 = (2*np.pi*3e14)/lamp0
-omgp = np.linspace(omgp0-3*sigma, omgp0+3*sigma,100)
+omgp = np.linspace(omgp0-3*sigma, omgp0+3*sigma,Ns)
 
 a_s = 0.6
 
@@ -109,7 +111,7 @@ omgs0 = (2*np.pi*3e14)/lams0
 omgi0 = (2*np.pi*3e14)/lami0
 
 dw = 24e12
-Ns = 100
+
 
 oms = np.linspace(omgs0 - dw, omgs0 + dw, Ns)
 omi = np.linspace(omgi0 - dw, omgi0 + dw, Ns)
