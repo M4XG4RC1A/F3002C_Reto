@@ -10,7 +10,7 @@ libraryFDE;
 #Properties for waveguide component (Si3N4)
 wg = {"name": "Si3N4",
       "width": 1,
-      "height": 0.5,
+      "height": 0.825,
       "length": 1};
 #Properties for base component (SiO2)
 base = {"name": "SiO2",
@@ -24,8 +24,8 @@ wafer = {"name": "Si",
       "length": 1};
 #Properties for mesh FDE
 meshFDE = {"name": "FDE",
-      "xDef": 40,
-      "yDef": 40,
+      "xDef": 100,
+      "yDef": 100,
       "out": 1};
 #Properties for FDE Modal Analysis (in range, near, max)
 FDE = {"wavelength": 1.55,
@@ -78,7 +78,7 @@ progress=0;
 for (l=[lambs(1),lambs(2),lambs(3),photon(1),photon(2),photon(3)]){
     for (x=wgX){
         for (y=wgY){
-        print("Progress: "+num2str(progress/150)+"%")
+        print("Progress: "+num2str(progress/75)+"%");
         try {    
             print("Running x:"+num2str(x)+", y:"+num2str(y)+", l:"+num2str(l));
             #Change dimensions
@@ -87,10 +87,15 @@ for (l=[lambs(1),lambs(2),lambs(3),photon(1),photon(2),photon(3)]){
             FDE.wavelength = l;
             #Prepare geometry and Mesh
             centerWG(wg,base,wafer);
-            
             centerMesh(meshFDE,wg);
+            prepareFDE(FDE);
+                        
             #Calculate modes
             nmodes = runModes();
+<<<<<<< HEAD
+            matlabsave("./nModes/Waveguide"+num2str(x*1000)+"_"+num2str(y*1000)+"_"+num2str(l*1000),nmodes);
+            print("Waveguide"+num2str(x*1000)+"_"+num2str(y*1000)+"_"+num2str(l*1000));
+=======
             if(nmodes!=0){
                 print("Modes>0, Modes:"+num2str(nmodes));
                 #Get main modes
@@ -132,6 +137,7 @@ for (l=[lambs(1),lambs(2),lambs(3),photon(1),photon(2),photon(3)]){
                 print(Error);
                 matlabsave("./NoModes/Waveguide"+num2str(x*1000)+"_"+num2str(y*1000)+"_"+num2str(l*1000),Error);
             }
+>>>>>>> 8447846c4dc28501d6cd4d7412da20202b132de7
         }
         progress = progress+1;
         }
