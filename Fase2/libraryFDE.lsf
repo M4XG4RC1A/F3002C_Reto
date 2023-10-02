@@ -169,12 +169,12 @@ function saveModes(mode,folder,name,data){
     area = getdata("FDE::data::mode"+num2str(mode),"mode effective area");
     
     #Save data as lumerical type
-    if(data.lumerical){ savedata("./"+folder+"/"+name,area,E,H); }
+    if(data.lumerical){ savedata("./"+folder+"/Lumerical/"+name,area,E,H); }
     #Save data as matlab type    
-    if(data.matlab){ matlabsave("./"+folder+"/"+name,area,E,H); }
+    if(data.matlab){ matlabsave("./"+folder+"/Matlab/"+name,area,E,H); }
     #Save data images    
     if(data.model){
         image(E.x*1e6,E.y*1e6,E.E2,"x(microns)","y(microns)","Compact Model");
-        exportfigure("./"+folder+"/"+name+"_CompactModel");
+        exportfigure("./"+folder+"/Images/"+name+"_CompactModel");
     }
 }

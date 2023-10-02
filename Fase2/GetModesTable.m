@@ -2,8 +2,8 @@
 %% getmodes
 clc;
 
-Xs = linspace(825,1000,5);
-Ys = linspace(775,1000,5);
+Xs = linspace(650,1000,10);
+Ys = linspace(55,1000,10);
 Ls = ["\lambda", "A_{eff}"];
 
 lenX = length(Xs);
