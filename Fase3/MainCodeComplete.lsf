@@ -106,7 +106,6 @@ for (i=5:length(xAnalisis)){
         }
     }
     progress = progress+1;
-    }
 }
 
 print("Finish");
