@@ -2,8 +2,8 @@
 %% getmodes
 clc;
 
-Xs = linspace(650,1000,10);
-Ys = linspace(55,1000,10);
+Xs = round(linspace(650,1000,10)*1000);
+Ys = round(linspace(550,1000,10)*1000);
 Ls = ["\lambda", "A_{eff}"];
 
 lenX = length(Xs);
@@ -20,7 +20,7 @@ fprintf(fileID,'%s\n',"     & &\multicolumn{"+num2str(lenX)+"}{c}{Wg_x}\\");
 
 strLine = "     & ";
 for x = Xs
-    strLine = strLine+"&"+num2str(x)+"nm";
+    strLine = strLine+"&"+num2str(x/1000)+"nm";
 end
 strLine = strLine+"\\ \cline{1-"+num2str(lenX+4)+"} \\[-1em]";
 fprintf(fileID,'%s\n',strLine);
@@ -30,19 +30,19 @@ endStrLine = "";%"&\multirow{"+num2str(lenL*lenY)+"}{*}{$\lambda$}";
 
 nmodes = 0;
 for y = Ys
-    strLine = firstStrStart+"&\multirow{"+num2str(lenL)+"}{*}{"+num2str(y)+"nm}";
+    strLine = firstStrStart+"&\multirow{"+num2str(lenL)+"}{*}{"+num2str(y/1000)+"nm}";
     for l = Ls
         for x=Xs
-            load("./nModes/Waveguide"+string(x*1000)+"_"+string(y*1000)+".mat");
+            load("./nModes/Waveguide"+string(x)+"_"+string(y)+"_1580.mat");
             if l == "\lambda"
-                strLine = strLine+"&"+num2str(nmodes)+"("+num2str(x*y)+")";
+                strLine = strLine+"&"+num2str(nmodes);
             else
-                line = sprintf('%.0f,' , nonzeros(Aeff));
+                line = sprintf('%.4f,' , nonzeros(Aeff.*1e12));
                 line  = line(1:end-1);
                 strLine = strLine+"&"+line;
             end
         end
-        strLine = strLine+"&"+l+"nm"+endStrLine+"\\";
+        strLine = strLine+"&"+l+endStrLine+"\\";
         fprintf(fileID,'%s\n',strLine);
         strLine = "&";
         endStrLine="";

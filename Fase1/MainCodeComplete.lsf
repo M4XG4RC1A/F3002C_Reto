@@ -87,8 +87,8 @@ for (l=[lambs(1),lambs(2),lambs(3),photon(1),photon(2),photon(3)]){
             FDE.wavelength = l;
             #Prepare geometry and Mesh
             centerWG(wg,base,wafer);
-            
             centerMesh(meshFDE,wg);
+            prepareFDE(FDE);
             #Calculate modes
             nmodes = runModes();
             if(nmodes!=0){

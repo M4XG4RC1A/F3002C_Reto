@@ -86,13 +86,13 @@ function saveMode(nmodes,mode,folder,name,data){
     P = getresult("FDE::data::mode"+num2str(mode),"P");
     
     #Save data as lumerical type
-    if(data.lumerical){ savedata("./"+folder+"/"+name,nmodes,neff,ng,TE,E,H,P); }
+    if(data.lumerical){ savedata("./"+folder+"/Lumerical/"+name,nmodes,neff,ng,TE,E,H,P); }
     #Save data as matlab type    
-    if(data.matlab){ matlabsave("./"+folder+"/"+name,nmodes,neff,ng,TE,E,H,P); }
+    if(data.matlab){ matlabsave("./"+folder+"/Matlab/"+name,nmodes,neff,ng,TE,E,H,P); }
     #Save data images    
     if(data.model){
         image(dataX*1e6,dataY*1e6,intE,"x(microns)","y(microns)","Compact Model");
-        exportfigure("./"+folder+"/"+name+"_CompactModel");
+        exportfigure("./"+folder+"/Images/"+name+"_CompactModel");
     }
 }
 
@@ -111,13 +111,13 @@ function saveModeOverlap(nmodes,modeOverlap,folder,name,data){
     P = getresult("FDE::data::mode"+num2str(mode),"P");
     
     #Save data as lumerical type
-    if(data.lumerical){ savedata("./"+folder+"/"+name,nmodes,modeOverlap,neff,ng,TE,E,H,P); }
+    if(data.lumerical){ savedata("./"+folder+"/Lumerical/"+name,nmodes,modeOverlap,neff,ng,TE,E,H,P); }
     #Save data as matlab type    
-    if(data.matlab){ matlabsave("./"+folder+"/"+name,nmodes,modeOverlap,neff,ng,TE,E,H,P); }
+    if(data.matlab){ matlabsave("./"+folder+"/Matlab/"+name,nmodes,modeOverlap,neff,ng,TE,E,H,P); }
     #Save data images    
     if(data.model){
-        image(dataX*1e6,dataY*1e6,intE,"x(microns)","y(microns)","Compact Model");
-        exportfigure("./"+folder+"/"+name+"_CompactModel");
+        image(E.x*1e6,E.y*1e6,E.E2,"x(microns)","y(microns)","Compact Model");
+        exportfigure("./"+folder+"/Images/"+name+"_CompactModel");
     }
 }
 
@@ -176,5 +176,35 @@ function saveModes(mode,folder,name,data){
     if(data.model){
         image(E.x*1e6,E.y*1e6,E.E2,"x(microns)","y(microns)","Compact Model");
         exportfigure("./"+folder+"/"+name+"_CompactModel");
+    }
+}
+
+#Save data from sweep analysis
+function saveSweepSimple(folder,name,data){
+    #Storage mode data in variables    
+    #10 Space storage    
+    lambda = c/getdata("FDE::data::frequencysweep","f")*1e6;
+    loss = getdata("FDE::data::frequencysweep","loss");
+    neff = abs(getdata("FDE::data::frequencysweep","neff"));
+    #9 Space storage
+    vgLambda = c/getdata("FDE::data::frequencysweep","f_vg")*1e6;    
+    vg = getdata("FDE::data::frequencysweep","vg");
+    ng = c/vg;
+    #8 Space storage
+    dLambda = c/getdata("FDE::data::frequencysweep","f_D")*1e6;
+    dispersion = getdata("FDE::data::frequencysweep","D");
+    
+    #Save data as lumerical type
+    if(data.lumerical){ savedata("./"+folder+"/Lumerical/"+name,lambda,loss,neff,vgLambda,vg,ng,dLambda,dispersion); }
+    #Save data as matlab type    
+    if(data.matlab){ matlabsave("./"+folder+"/Matlab/"+name,lambda,loss,neff,vgLambda,vg,ng,dLambda,dispersion); }
+    #Save data images    
+    if(data.model){
+        plot(vgLambda,ng,"Wavelength (microns)","Group Index");
+        legend("ng");
+        exportfigure("./"+folder+"/Images/"+name+"_ngvslambda");
+        plot(lambda,neff,"Wavelength (microns)","Effective Index");
+        legend("neff");
+        exportfigure("./"+folder+"/Images/"+name+"_neffvslambda");
     }
 }
