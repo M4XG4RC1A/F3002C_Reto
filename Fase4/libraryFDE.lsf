@@ -91,7 +91,7 @@ function saveMode(nmodes,mode,folder,name,data){
     if(data.matlab){ matlabsave("./"+folder+"/Matlab/"+name,nmodes,neff,ng,TE,E,H,P); }
     #Save data images    
     if(data.model){
-        image(dataX*1e6,dataY*1e6,intE,"x(microns)","y(microns)","Compact Model");
+        image(E.x*1e6,E.y*1e6,E.E2,"x(microns)","y(microns)","Compact Model");
         exportfigure("./"+folder+"/Images/"+name+"_CompactModel");
     }
 }
@@ -169,13 +169,13 @@ function saveModes(mode,folder,name,data){
     area = getdata("FDE::data::mode"+num2str(mode),"mode effective area");
     
     #Save data as lumerical type
-    if(data.lumerical){ savedata("./"+folder+"/"+name,area,E,H); }
+    if(data.lumerical){ savedata("./"+folder+"/Lumerical/"+name,area,E,H); }
     #Save data as matlab type    
-    if(data.matlab){ matlabsave("./"+folder+"/"+name,area,E,H); }
+    if(data.matlab){ matlabsave("./"+folder+"/Matlab/"+name,area,E,H); }
     #Save data images    
     if(data.model){
         image(E.x*1e6,E.y*1e6,E.E2,"x(microns)","y(microns)","Compact Model");
-        exportfigure("./"+folder+"/"+name+"_CompactModel");
+        exportfigure("./"+folder+"/Images/"+name+"_CompactModel");
     }
 }
 
