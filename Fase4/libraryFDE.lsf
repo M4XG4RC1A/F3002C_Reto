@@ -1,0 +1,210 @@
+#FDE related library
+print("FDE library ON");
+
+#Prepare FDE modal analysis
+function prepareFDE(fde){
+    #Set analysis wavelength
+    setanalysis("wavelength",fde.wavelength*1e-6);
+    #Set index study type    
+    if(fde.nsearch=="in range"){
+        setanalysis("search","in range");
+        setanalysis("n1",fde.n1);
+        setanalysis("n2",fde.n2);
+    }else if(fde.nsearch=="near"){
+        setanalysis("search","near n");
+        setanalysis("use max index",0);
+        setanalysis("n",fde.n1);
+    }else if(fde.nsearch=="max"){
+        setanalysis("search","near n");
+        setanalysis("use max index",1);
+    }else{
+        print("Invalid FDE Modal Study type");
+    }
+}
+
+#Prepare FDE frequency analysis for allmodes
+function prepareSweep(sweep){
+    #Set multiple modes analysis
+    setanalysis("track selected mode",0);
+    #Set wave limits
+    if(sweep.type=="frequency"){
+        setanalysis("start frequency",sweep.start);
+        setanalysis("stop frequency",sweep.stop);
+    }else if(sweep.type=="wavelength"){
+        setanalysis("start wavelength",sweep.start);
+        setanalysis("stop wavelength",sweep.stop);
+    }else{
+        print("Invalid type sweep");
+    }
+    #Set parameters for frequency analysis
+    setanalysis("number of points",sweep.points);
+    setanalysis("number of test modes",sweep.modes);
+    setanalysis("effective index",sweep.neff);
+}
+
+#Prepare FDE frequency analysis for single mode
+function prepareSingleSweep(sweep){
+    #Select mode for analysis
+    selectmode(sweep.mode);
+    #Set single mode analysis
+    setanalysis("track selected mode",1);
+    #Set wave limits
+    if(sweep.type=="frequency"){
+        setanalysis("stop frequency",sweep.stop*1e12);
+    }else if(sweep.type=="wavelength"){
+        setanalysis("stop wavelength",sweep.stop*1e-6);
+    }else{
+        print("Invalid type sweep");
+    }
+    #Set parameters for frequency analysis
+    setanalysis("number of points",sweep.points);
+    setanalysis("number of test modes",sweep.modes);
+}
+
+#Run and get modes
+function runModes(){
+    nmodes=findmodes;
+    return nmodes;
+}
+
+
+#Run sweep analysis
+function runSweep(){
+    frequencysweep;
+}
+
+#Save data from modal analysis
+function saveMode(nmodes,mode,folder,name,data){
+    #Storage mode data in variables    
+    neff = getdata("FDE::data::mode"+num2str(mode),"neff");
+    ng = getdata("FDE::data::mode"+num2str(mode),"ng");
+    TE = getdata("FDE::data::mode"+num2str(mode),"TE polarization fraction");
+    
+    #Storage results data
+    E = getresult("FDE::data::mode"+num2str(mode),"E");
+    H = getresult("FDE::data::mode"+num2str(mode),"H");
+    P = getresult("FDE::data::mode"+num2str(mode),"P");
+    
+    #Save data as lumerical type
+    if(data.lumerical){ savedata("./"+folder+"/Lumerical/"+name,nmodes,neff,ng,TE,E,H,P); }
+    #Save data as matlab type    
+    if(data.matlab){ matlabsave("./"+folder+"/Matlab/"+name,nmodes,neff,ng,TE,E,H,P); }
+    #Save data images    
+    if(data.model){
+        image(dataX*1e6,dataY*1e6,intE,"x(microns)","y(microns)","Compact Model");
+        exportfigure("./"+folder+"/Images/"+name+"_CompactModel");
+    }
+}
+
+function saveModeOverlap(nmodes,modeOverlap,folder,name,data){
+    #Get mode
+    mode = modeOverlap.i;
+        
+    #Storage mode data in variables    
+    neff = getdata("FDE::data::mode"+num2str(mode),"neff");
+    ng = getdata("FDE::data::mode"+num2str(mode),"ng");
+    TE = getdata("FDE::data::mode"+num2str(mode),"TE polarization fraction");
+    
+    #Storage results data
+    E = getresult("FDE::data::mode"+num2str(mode),"E");
+    H = getresult("FDE::data::mode"+num2str(mode),"H");
+    P = getresult("FDE::data::mode"+num2str(mode),"P");
+    
+    #Save data as lumerical type
+    if(data.lumerical){ savedata("./"+folder+"/Lumerical/"+name,nmodes,modeOverlap,neff,ng,TE,E,H,P); }
+    #Save data as matlab type    
+    if(data.matlab){ matlabsave("./"+folder+"/Matlab/"+name,nmodes,modeOverlap,neff,ng,TE,E,H,P); }
+    #Save data images    
+    if(data.model){
+        image(E.x*1e6,E.y*1e6,E.E2,"x(microns)","y(microns)","Compact Model");
+        exportfigure("./"+folder+"/Images/"+name+"_CompactModel");
+    }
+}
+
+#Save data from sweep analysis
+function saveSweep(wavelength,folder,name,data){
+    #Storage mode data in variables    
+    #10 Space storage    
+    lambda = c/getdata("FDE::data::frequencysweep","f")*1e6;
+    loss = getdata("FDE::data::frequencysweep","loss");
+    neff = abs(getdata("FDE::data::frequencysweep","neff"));
+    #9 Space storage
+    vgLambda = c/getdata("FDE::data::frequencysweep","f_vg")*1e6;    
+    vg = getdata("FDE::data::frequencysweep","vg");
+    ng = c/vg;
+    #8 Space storage
+    dLambda = c/getdata("FDE::data::frequencysweep","f_D")*1e6;
+    dispersion = getdata("FDE::data::frequencysweep","D");
+    compactModel = getCompactModel(wavelength);
+    
+    #Save data as lumerical type
+    if(data.lumerical){ savedata("./"+folder+"/"+name,wavelength,lambda,loss,neff,vgLambda,vg,ng,dLambda,dispersion,compactModel); }
+    #Save data as matlab type    
+    if(data.matlab){ matlabsave("./"+folder+"/"+name,wavelength,lambda,loss,neff,vgLambda,vg,ng,dLambda,dispersion,compactModel); }
+    #Save data images    
+    if(data.model){
+        plot(vgLambda,ng,"Wavelength (microns)","Group Index");
+        legend("ng");
+        exportfigure("./"+folder+"/"+name+"_ngvslambda");
+        plot(lambda,neff,"Wavelength (microns)","Effective Index");
+        legend("neff");
+        exportfigure("./"+folder+"/"+name+"_neffvslambda");
+        plot (lambda, neff, "lambda", "neff", compactModel.ec, "plot type=line, color=red, pen=-, linewidth=2");  # plot the result
+        holdon;    
+        plot (lambda,  compactModel.fit, "lambda", "neff", compactModel.ec, "plot type=line, color=blue, pen=-., linewidth=2");  # plot the result    
+        legend("neff","Fit");
+        exportfigure("./"+folder+"/"+name+"_compactModel");
+        holdoff;
+    }
+}
+
+#Saves Mode simple with overlap
+function saveModes(mode,folder,name,data){
+        
+    #Storage mode data in variables    
+    ng = getdata("FDE::data::mode"+num2str(mode),"ng");
+    TE = getdata("FDE::data::mode"+num2str(mode),"TE polarization fraction");
+    E = getresult("FDE::data::mode"+num2str(mode),"E");
+    H = getresult("FDE::data::mode"+num2str(mode),"H");
+    area = getdata("FDE::data::mode"+num2str(mode),"mode effective area");
+    
+    #Save data as lumerical type
+    if(data.lumerical){ savedata("./"+folder+"/"+name,area,E,H); }
+    #Save data as matlab type    
+    if(data.matlab){ matlabsave("./"+folder+"/"+name,area,E,H); }
+    #Save data images    
+    if(data.model){
+        image(E.x*1e6,E.y*1e6,E.E2,"x(microns)","y(microns)","Compact Model");
+        exportfigure("./"+folder+"/"+name+"_CompactModel");
+    }
+}
+
+#Save data from sweep analysis
+function saveSweepSimple(folder,name,data){
+    #Storage mode data in variables    
+    #10 Space storage    
+    lambda = c/getdata("FDE::data::frequencysweep","f")*1e6;
+    loss = getdata("FDE::data::frequencysweep","loss");
+    neff = abs(getdata("FDE::data::frequencysweep","neff"));
+    #9 Space storage
+    vgLambda = c/getdata("FDE::data::frequencysweep","f_vg")*1e6;    
+    vg = getdata("FDE::data::frequencysweep","vg");
+    ng = c/vg;
+    #8 Space storage
+    dLambda = c/getdata("FDE::data::frequencysweep","f_D")*1e6;
+    dispersion = getdata("FDE::data::frequencysweep","D");
+    
+    #Save data as lumerical type
+    if(data.lumerical){ savedata("./"+folder+"/Lumerical/"+name,lambda,loss,neff,vgLambda,vg,ng,dLambda,dispersion); }
+    #Save data as matlab type    
+    if(data.matlab){ matlabsave("./"+folder+"/Matlab/"+name,lambda,loss,neff,vgLambda,vg,ng,dLambda,dispersion); }
+    #Save data images    
+    if(data.model){
+        plot(vgLambda,ng,"Wavelength (microns)","Group Index");
+        legend("ng");
+        exportfigure("./"+folder+"/Images/"+name+"_ngvslambda");
+        plot(lambda,neff,"Wavelength (microns)","Effective Index");
+        legend("neff");
+        exportfigure("./"+folder+"/Images/"+name+"_neffvslambda");
+    }
+}

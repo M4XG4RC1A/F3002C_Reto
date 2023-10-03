@@ -1,0 +1,32 @@
+#Geometry related library
+print("Geometry library ON");
+
+#Modify rectangle object
+function modBlock(obj,pos){
+    switchtolayout;
+    #Set Coordinates    
+    setnamed(obj.name,"x",pos(1)*1e-6);
+    setnamed(obj.name,"y",pos(2)*1e-6);
+    setnamed(obj.name,"z",pos(3)*1e-6);
+    
+    #Set sizes    
+    setnamed(obj.name,"x span",obj.width*1e-6);
+    setnamed(obj.name,"y span",obj.height*1e-6);
+    setnamed(obj.name,"z span",obj.length*1e-6);
+}
+
+#Modify single waveguide
+function modifyWG(wg,base,wafer,pos){
+    #Modify waveguide
+    modBlock(wg,pos);
+    #Modify base
+    modBlock(base,[pos(1),pos(2)-(wg.height/2+base.height/2),pos(3)]);
+    #Modify wafer
+    modBlock(wafer,[pos(1),pos(2)-(wg.height/2+base.height+wafer.height/2),pos(3)]);
+}
+
+#Modify center waveguide
+function centerWG(wg,base,wafer){
+    #Modify waveguide to center
+    modifyWG(wg,base,wafer,[0,0,0]);
+}
