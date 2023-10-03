@@ -5,7 +5,7 @@ Solucion al reto Concentracion en Fotonica y Tecnologias Cuanticas
 	- [x] Valor de Y de linspace(0.1,1,5)
 	- [x] Valor de lambda de linspace(1.53,1.58,3) y [0.51,0.75,1]
 	- [x] Guardar analisis de modos y frecuencias.
-- [ ] Fase 2: Obtener los modos en un rango de X=825x1000nm, Y=775x1000nm, \lambda=1530:1580
+- [x] Fase 2: Obtener los modos en un rango de X=825x1000nm, Y=775x1000nm, \lambda=1530:1580
 	- [x] Valor de X de linspace(0.650,1,10)
 	- [x] Valor de Y de linspace(0.550,1,10)
 	- [x] Valor de lambda de 1.58
