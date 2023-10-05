@@ -77,78 +77,79 @@ lams = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
 # Lambda Meshgrids
 LAMP, LAMS = np.meshgrid(lamp, lams)
 
-# DK_TE = DK(LAMP, LAMS, coefficients)
+DK_TE = DK(LAMP, LAMS, coefficients)
 
-# # Check the shape and a sample value to ensure calculations are correct
-# DK_TE.shape, DK_TE[1000, 1000]
+# # # Check the shape and a sample value to ensure calculations are correct
+DK_TE.shape, DK_TE[1000, 1000]
 
-# # Plotting the contour for DK_TE without the colorbar
-# plt.figure(figsize=(10, 8))
-# plt.contour(lamp, lams, DK_TE, [0], colors='b', linewidths=2)
-# plt.title('Contour plot of Phase Mismatch (DK_TE)')
-# plt.xlabel('lamp')
-# plt.ylabel('lams')
-# plt.grid(True)
-# plt.tight_layout()
-# plt.show()
+# Plotting the contour for DK_TE without the colorbar
+plt.figure(figsize=(10, 8))
+plt.contour(lamp, lams, DK_TE, [0], colors='b', linewidths=2)
+plt.title('Contour plot of Phase Mismatch (DK_TE)')
+plt.xlabel('lamp')
+plt.ylabel('lams')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
 
 
-L = 0.1e6
-sigma = 0.1e12
-lamp0 = 0.762
+L = 0.5e6 # in mm
+SIGMA = 0.1e12
+L0 = 0.7958
 NL = 0
 
-Ns = 1000
+N = 500
 
-omgp0 = (2*np.pi*3e14)/lamp0
-omgp = np.linspace(omgp0-3*sigma, omgp0+3*sigma,Ns)
+omp0 = (2*np.pi*3e14)/L0
+omp = np.linspace(omp0-3*SIGMA, omp0+3*SIGMA,N)
 
 a_s = 0.6
 
-[lams0, lami0] = lsli(lamp0, NL, a_s, coefficients)
+[lams0, lami0] = lsli(L0, NL, a_s, coefficients)
 
-omgs0 = (2*np.pi*3e14)/lams0
-omgi0 = (2*np.pi*3e14)/lami0
+oms0 = (2*np.pi*3e14)/lams0
+omi0 = (2*np.pi*3e14)/lami0
 
 dw = 24e12
 
 
-oms = np.linspace(omgs0 - dw, omgs0 + dw, Ns)
-omi = np.linspace(omgi0 - dw, omgi0 + dw, Ns)
+oms = np.linspace(oms0 - dw, oms0 + dw, N)
+omi = np.linspace(omi0 - dw, omi0 + dw, N)
 
 [OMS, OMI] = np.meshgrid(oms,omi)
 
 KS = k_lambda((2*np.pi*3e14)/OMS, coefficients)
 KI = k_lambda((2*np.pi*3e14)/OMI, coefficients)
-KP1 = k_lambda((2*np.pi*3e14)/omgp, coefficients)
+KP1 = k_lambda((2*np.pi*3e14)/omp, coefficients)
 
-dwp = omgp[1]- omgp[0]
-JSA = 0
+d_wp = omp[1]- omp[0]
+F_cp = 0
 
-# Integrate JSA
-# JSJSJS FOR LOOP TAN RANDOM QUE NI YO LO ENTIENDO
+def alpha1 (omg, sig):
+    return -((omg)**2)/(sig**2)
 
-for i in range(0, len(omgp)):
-    KP2 = k_lambda(2*np.pi*3e14/(OMS + OMI - omgp[i]), coefficients)
-    D_K = KP1 + KP2 - KS - KI - NL 
+# integral go brrrrrr
+for j in range(len(omp)):
+    KP2 = k_lambda(2*np.pi*3e14/(OMS + OMI - omp[j]), coefficients)
+    delta_K = KP1[j] + KP2 - KS - KI - NL
 
-    # INTEGRAL GO BRRR
+    F_cp += d_wp *(
+                np.exp(alpha1(omp[j] - omp0,SIGMA)) *
+                np.exp(alpha1(OMS + OMI - omp[j] - omp0,SIGMA)) *
+                np.sinc(L * (delta_K) / 2)  *
+                np.exp(1j * L * (delta_K) / 2)
+                )
 
-    JSA += dwp * np.exp(
-                        -((omgp[i]-omgp0)**2)/(sigma**2) *
-                        np.exp(-(OMS+OMI-omgp[i]-omgp0)**2 / (sigma**2))
-            
-                        ) * np.sinc( 
-                                    (L/2) * D_K)* np.exp(1j * L * (KP1[i] + KP2 - KS - KI -NL )/2 )
-        
 
 plt.figure(figsize=(10, 8))
-plt.pcolor(oms, omi, np.abs(JSA)**2)
+plt.pcolor(oms, omi, np.abs(F_cp)**2)
+# Add colorbar
+cbar = plt.colorbar()
+cbar.set_label('Intensity')
 plt.title('JSA')
 plt.xlabel('oms')
 plt.ylabel('omi')
 plt.grid(True)
 plt.tight_layout()
 plt.show()
-
 
