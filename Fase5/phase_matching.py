@@ -84,12 +84,12 @@ def compute_k_l(path):
 pathTE = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/SweepOverlapTE/Waveguide1000_325_1580.mat'
 
 # buenisimo
-pathTE = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/SweepOverlapTE/Waveguide1000_550_1580.mat'
+pathTE = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide727778_1000000_1580_Mode3.mat'
 
 
 #pathTM = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/TM/Waveguide1000_325_1555.mat'
 
-
+pathTE = 'Fase4/Sweep/Matlab/Waveguide1000000_750000_1580_Mode3.mat'
 
 # Phase mismatch
 kp_TE, ks_TE, ki_TE, lamp, lams = compute_k_l(pathTE)
@@ -109,4 +109,3 @@ plt.ylabel('lams')
 plt.grid(True)
 plt.tight_layout()
 plt.show()
-

@@ -37,26 +37,9 @@ def compute_k_l(path, two_D=False):
     Begin 3d arrangement of DK 
     
     """
-    LAMBDA_MIN = 1
-    LAMBDA_MAX = 2.5
-    POINTS = 30
-
-    if two_D:
-        # Lambda arrangements
-        lamp = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
-        lams = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
-        lamr = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
-
-        # Lambda Meshgrids
-        LAMP, LAMS = np.meshgrid(lamp, lams)
-
-        LAMI = 1. / (2. / LAMP - 1. / LAMS)
-        kp = k_lambda(LAMP, coefficients)
-        ks = k_lambda(LAMS, coefficients)
-        kr = k_lambda(LAMR, coefficients)
-        ki = k_lambda(LAMI, coefficients)
-
-        return kp, ks, ki, kr, lamp, lams, lamr
+    LAMBDA_MIN = 0
+    LAMBDA_MAX = 2
+    POINTS = 300
 
     # Lambda arrangements
     lamp = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
@@ -101,11 +84,18 @@ def interpolate_color(color1, color2, factor):
 
 
 
-# bueno
-pathTE = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/SweepOverlapTE/Waveguide1000_325_1580.mat'
+# # bueno
+# pathTE = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/SweepOverlapTE/Waveguide1000_325_1580.mat'
 
-# buenisimo
-pathTE = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/SweepOverlapTE/Waveguide1000_550_1580.mat'
+# # buenisimo
+# pathTE = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide727778_1000000_1580_Mode3.mat'
+
+
+pathTE = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide727778_1000000_1580_Mode3.mat'
+
+pathTE = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide727778_1000000_1580_Mode3.mat'
+
+
 
 
 #pathTM = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/TM/Waveguide1000_325_1555.mat'

@@ -34,6 +34,10 @@ def lsli(lamp, NL, as_, coeff):
 
 path = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/SweepOverlapTE/Waveguide1000_550_1580.mat'
 
+path = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide1000000_850000_1580_Mode3.mat'
+
+path = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide922222_800000_1580_Mode3.mat'
+
 """ TAYLOR APPROXIMATION """
 
 neff_values, lambda_values = load_data_from_mat(path)
@@ -93,7 +97,7 @@ plt.tight_layout()
 plt.show()
 
 
-L = 0.5e6 # in mm
+L = 0.1e6 # in mm
 SIGMA = 0.1e12
 L0 = 0.7958
 NL = 0
