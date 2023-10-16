@@ -4,17 +4,7 @@ import h5py
 from load_and_taylor import load_data_from_mat, fit_polynomial, create_taylor_approximation, plot_approximation, k_lambda
 from scipy.optimize import fsolve
 import pandas as pd
-
-
-"""  CIERRA LOS OJOS MAX NO VEAS ESTO   """
-
-neff_df = pd.read_csv('/home/jay/Downloads/NeffP12.csv')
-filtered_rows = neff_df[~neff_df.isin([333, 555]).any(axis=1)]
-neffLimpio = filtered_rows.copy()
-Neff_limpio = neffLimpio.values
-lambda_values = np.array(neffLimpio.columns, dtype=float)
-Neff_limpio, lambda_values
-neff_values = Neff_limpio[0]
+import os
 
 def DK(LAMP, LAMS, coeff):
         LAMI = 1. / (2. / LAMP - 1. / LAMS)
@@ -32,15 +22,46 @@ def lsli(lamp, NL, as_, coeff):
 
     return lams, lami
 
-path = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/SweepOverlapTE/Waveguide1000_550_1580.mat'
+def plot_contour(lamp, lams, DK_TE, path):
 
-path = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide1000000_850000_1580_Mode3.mat'
+    plt.figure(figsize=(10, 8))
+    plt.contour(lamp, lams, DK_TE, [0], colors='b', linewidths=2)
+    plt.title('Contour plot of Phase Mismatch (DK_TE)')
+    plt.xlabel('lamp')
+    plt.ylabel('lams')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig('DK.png')
 
-path = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide922222_800000_1580_Mode3.mat'
+def plot_correlation(oms, omi, F_cp, path):
+
+    plt.figure(figsize=(10, 8))
+    plt.pcolor(oms, omi, np.abs(F_cp)**2)
+    # Add colorbar
+    cbar = plt.colorbar()
+    cbar.set_label('Intensity')
+    plt.title('JSA')
+    plt.xlabel('oms')
+    plt.ylabel('omi')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig('F_cp.png')
+
+path = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide727778_1000000_1580_Mode3.mat'
 
 """ TAYLOR APPROXIMATION """
 
 neff_values, lambda_values = load_data_from_mat(path)
+
+"""  CIERRA LOS OJOS MAX NO VEAS ESTO   """
+
+neff_df = pd.read_csv('/home/jay/Downloads/NeffP12.csv')
+filtered_rows = neff_df[~neff_df.isin([333, 555]).any(axis=1)]
+neffLimpio = filtered_rows.copy()
+Neff_limpio = neffLimpio.values
+lambda_values = np.array(neffLimpio.columns, dtype=float)
+Neff_limpio, lambda_values
+neff_values = Neff_limpio[0]
 
 # Fit polynomial
 coefficients = fit_polynomial(lambda_values, neff_values)
@@ -86,20 +107,11 @@ DK_TE = DK(LAMP, LAMS, coefficients)
 # # # Check the shape and a sample value to ensure calculations are correct
 DK_TE.shape, DK_TE[1000, 1000]
 
-# Plotting the contour for DK_TE without the colorbar
-plt.figure(figsize=(10, 8))
-plt.contour(lamp, lams, DK_TE, [0], colors='b', linewidths=2)
-plt.title('Contour plot of Phase Mismatch (DK_TE)')
-plt.xlabel('lamp')
-plt.ylabel('lams')
-plt.grid(True)
-plt.tight_layout()
-plt.show()
-
+plot_contour(lamp, lams, DK_TE, path)
 
 L = 0.1e6 # in mm
 SIGMA = 0.1e12
-L0 = 0.7958
+L0 = 0.798
 NL = 0
 
 N = 500
@@ -143,17 +155,6 @@ for j in range(len(omp)):
                 np.sinc(L * (delta_K) / 2)  *
                 np.exp(1j * L * (delta_K) / 2)
                 )
-
-
-plt.figure(figsize=(10, 8))
-plt.pcolor(oms, omi, np.abs(F_cp)**2)
-# Add colorbar
-cbar = plt.colorbar()
-cbar.set_label('Intensity')
-plt.title('JSA')
-plt.xlabel('oms')
-plt.ylabel('omi')
-plt.grid(True)
-plt.tight_layout()
-plt.show()
+    
+plot_correlation(oms,omi,F_cp,path)
 
