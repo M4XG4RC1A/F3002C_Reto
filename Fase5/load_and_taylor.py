@@ -41,3 +41,20 @@ def k_lambda(lambda_val, coefficients):
     """Compute the propagation constant for given lambda values using polynomial coefficients."""
     neff = np.polyval(coefficients, lambda_val)
     return (2 * np.pi * neff) / lambda_val
+
+def k_prime_lambda(lambda_val, coefficients):
+    """Compute the derivative of the propagation constant for given lambda values using polynomial coefficients."""
+    # Compute neff for given lambda_val
+    neff = np.polyval(coefficients, lambda_val)
+    
+    # Derive the coefficients of the polynomial to get the coefficients of neff' (derivative of neff)
+    derivative_coefficients = np.polyder(coefficients)
+    
+    # Evaluate the derivative polynomial to get the value of neff' at lambda_val
+    neff_prime = np.polyval(derivative_coefficients, lambda_val)
+    
+    # Compute k' using the formula above
+    k_prime = (2 * np.pi * (neff_prime * lambda_val - neff)) / lambda_val**2
+    
+    return k_prime
+

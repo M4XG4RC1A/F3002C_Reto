@@ -6,19 +6,21 @@ from scipy.optimize import fsolve
 import pandas as pd
 import os
 
-def DK(LAMP, LAMS, coeff):
-        LAMI = 1. / (2. / LAMP - 1. / LAMS)
+def DK(LAMP, LAMS, LAMR, coeff):
+        LAMI = 1. / (1. / LAMP - 1./ LAMS - 1. / LAMR)
         
         kp = k_lambda(LAMP, coeff)
         ks = k_lambda(LAMS, coeff)
         ki = k_lambda(LAMI, coeff)
+        kr = k_lambda(LAMR, coeff)
         
-        return kp + kp - ks - ki - 1e-6
+        return kp - ks - ki - kr - 1e-6
 
 
-def lsli(lamp, NL, a_s, coeff):
-    lams = fsolve(DK, a_s, args=(lamp, coeff), xtol=1e-20, maxfev=10000)[0]
-    lami = (2 * 3.14159 * 3e14) / ((2 * 3.14159 * 3e14) / lamp + (2 * 3.14159 * 3e14) / lamp - (2 * 3.14159 * 3e14) / lams)
+def lsli(lamp, NL, as_, coeff):
+    lams = fsolve(DK, as_, args=(lamp, coeff), xtol=1e-20, maxfev=10000)[0]
+    lamr = fsolve(DK, as_, args=(lamp, coeff), xtol=1e-20, maxfev=10000)[1]
+    lami = (2 * 3.14159 * 3e14) / ((2 * 3.14159 * 3e14) / lamp - (2 * 3.14159 * 3e14) / lamr - (2 * 3.14159 * 3e14) / lams)
 
     return lams, lami
 
@@ -40,7 +42,7 @@ def plot_correlation(oms, omi, F_cp, path):
     # Add colorbar
     cbar = plt.colorbar()
     cbar.set_label('Intensity')
-    plt.title('Integral F_cp')
+    plt.title('JSA')
     plt.xlabel('oms')
     plt.ylabel('omi')
     plt.grid(True)
@@ -92,31 +94,31 @@ K_taylor = (2 * np.pi * taylor_values) / lambda_range
 
 LAMBDA_MIN = 0.3
 LAMBDA_MAX = 2.3
-POINTS = 3000
+POINTS = 300
 
 
 # Lambda arrangements
 lamp = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
 lams = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
+lamr = np.linspace(LAMBDA_MIN, LAMBDA_MAX, POINTS)
+
 
 # Lambda Meshgrids
-LAMP, LAMS = np.meshgrid(lamp, lams)
+LAMP, LAMS, LAMR = np.meshgrid(lamp, lams, lamr)
 
-DK_TE = DK(LAMP, LAMS, coefficients)
+DK_TE = DK(LAMP, LAMS, LAMR, coefficients)
 
 # # # Check the shape and a sample value to ensure calculations are correct
-DK_TE.shape, DK_TE[1000, 1000]
+#DK_TE.shape, DK_TE[1000, 1000]
 
 plot_contour(lamp, lams, DK_TE, path)
 
-
-
-L = 0.03e6 # in mm
-SIGMA = 3e12
-L0 = 0.833
+L = 0.1e6 # in mm
+SIGMA = 0.1e12
+L0 = 0.798
 NL = 0
 
-N = 100
+N = 500
 
 omp0 = (2*np.pi*3e14)/L0
 omp = np.linspace(omp0-3*SIGMA, omp0+3*SIGMA,N)
@@ -128,12 +130,11 @@ a_s = 0.6
 oms0 = (2*np.pi*3e14)/lams0
 omi0 = (2*np.pi*3e14)/lami0
 
-dw = 30e12
-Ns = 200
+dw = 24e12
 
 
-oms = np.linspace(oms0 - dw, oms0 + dw, Ns)
-omi = np.linspace(omi0 - dw, omi0 + dw, Ns)
+oms = np.linspace(oms0 - dw, oms0 + dw, N)
+omi = np.linspace(omi0 - dw, omi0 + dw, N)
 
 [OMS, OMI] = np.meshgrid(oms,omi)
 
@@ -148,6 +149,7 @@ def alpha1 (omg, sig):
     return -((omg)**2)/(sig**2)
 
 # integral go brrrrrr
+
 for j in range(len(omp)):
     KP2 = k_lambda(2*np.pi*3e14/(OMS + OMI - omp[j]), coefficients)
     delta_K = KP1[j] + KP2 - KS - KI - NL

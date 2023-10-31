@@ -49,7 +49,7 @@ def compute_k_l(path, two_D=False):
     # Lambda Meshgrids
     LAMP, LAMS, LAMR = np.meshgrid(lamp, lams, lamr)
 
-    LAMI = 1. / (1. / LAMP - 1. / LAMS - 1. / LAMR)
+    LAMI = 1. / (2. / LAMP - 1. / LAMS - 1. / LAMR)
 
     # Propagation constants for each field
     kp = k_lambda(LAMP, coefficients)
