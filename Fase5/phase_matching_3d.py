@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import h5py
-from load_and_taylor import load_data_from_mat, fit_polynomial, create_taylor_approximation, plot_approximation, k_lambda
-
+from load_and_taylor import load_data_from_mat, fit_polynomial, create_taylor_approximation, plot_approximation, k_lambda, k_prime_lambda
 
 def compute_k_l(path, two_D=False):
     neff_values, lambda_values = load_data_from_mat(path)
@@ -21,7 +20,7 @@ def compute_k_l(path, two_D=False):
     taylor_values = taylor_polynomial(lambda_range - center_lambda)
 
     # Plot Neff approximation
-    plot_approximation(lambda_values, neff_values, lambda_range, original_values, taylor_values, 'Neff', 'Taylor Polynomial Approximation of Neff')
+    # plot_approximation(lambda_values, neff_values, lambda_range, original_values, taylor_values, 'Neff', 'Taylor Polynomial Approximation of Neff')
 
     #  # Calculate K(lambda)
     # K_values = (2 * np.pi * neff_values) / lambda_values
@@ -37,8 +36,8 @@ def compute_k_l(path, two_D=False):
     Begin 3d arrangement of DK 
     
     """
-    LAMBDA_MIN = 0
-    LAMBDA_MAX = 2
+    LAMBDA_MIN = 0.5
+    LAMBDA_MAX = 2.3
     POINTS = 300
 
     # Lambda arrangements
@@ -49,7 +48,7 @@ def compute_k_l(path, two_D=False):
     # Lambda Meshgrids
     LAMP, LAMS, LAMR = np.meshgrid(lamp, lams, lamr)
 
-    LAMI = 1. / (2. / LAMP - 1. / LAMS - 1. / LAMR)
+    LAMI = 1. / (1. / LAMP - 1. / LAMS - 1. / LAMR)
 
     # Propagation constants for each field
     kp = k_lambda(LAMP, coefficients)
@@ -57,10 +56,22 @@ def compute_k_l(path, two_D=False):
     kr = k_lambda(LAMR, coefficients)
     ki = k_lambda(LAMI, coefficients)
 
+    # K prime calculations
+    k_prime_p = k_prime_lambda(LAMP, coefficients)
+    k_prime_s = k_prime_lambda(LAMS, coefficients)
+    k_prime_r = k_prime_lambda(LAMR, coefficients)
+    k_prime_i = k_prime_lambda(LAMI, coefficients)
+
+    c = 3e8
+    kp_dw = - (LAMP ** 2 )/(2*np.pi*c) * k_prime_p
+    ks_dw = - (LAMS ** 2 )/(2*np.pi*c) * k_prime_s
+    kr_dw = - (LAMR ** 2 )/(2*np.pi*c) * k_prime_r
+    ki_dw = - (LAMI ** 2 )/(2*np.pi*c) * k_prime_i
+
 
     
 
-    return kp, ks, kr, ki, lamp, lams, lamr
+    return kp, ks, kr, ki, lamp, lams, lamr, kp_dw, ks_dw, kr_dw, ki_dw
 
 
 def hex_to_rgb(value):
@@ -95,18 +106,25 @@ pathTE = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide727778_1000000
 
 pathTE = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide727778_1000000_1580_Mode3.mat'
 
+pathTE = 'Fase4/Sweep/Matlab/Waveguide1000000_750000_1580_Mode3.mat'
 
 
 
 #pathTM = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/TM/Waveguide1000_325_1555.mat'
 
 # Phase mismatch
-kp, ks, ki, kr, lamp, lams, lamr = compute_k_l(pathTE)
+kp, ks, ki, kr, lamp, lams, lamr, kp_dw, ks_dw, kr_dw, ki_dw = compute_k_l(pathTE)
 #kp_TM, ks_TM, ki_TM = compute_k_l(pathTM)
 
-DK_2d = kp + kp - ks - ki - 1e-6
+#DK_2d = kp + kp - ks - ki - 1e-6
 
 DK_3d = kp - ks - kr - ki - 1e-6
+
+# Tau from K_prime
+tau_s = kp_dw - ks_dw
+tau_i = kp_dw - ki_dw
+tau_r = kp_dw - kr_dw
+
 
 # Plotting the contour for DK_TE without the colorbar
 plt.figure(figsize=(10, 8))
@@ -115,7 +133,7 @@ start_color = hex_to_rgb("#FF0000")
 end_color = hex_to_rgb("#0000FF")
 
 n = 100
-for i in range(n):
+for i in range(int(0),int(n/16),1):
     slice_index = int(len(DK_3d)*i/n)
     
     # Get interpolated color
@@ -124,7 +142,12 @@ for i in range(n):
     hex_color = rgb_to_hex(rgb_color)
 
     # Here's your plotting line with the new color:
-    plt.contour(lamp, lams, DK_3d[:, slice_index, :], 0, colors=hex_color, linewidths=0.5)
+    plt.contour(lamp, lams, DK_3d[:, slice_index, :], [0], colors=hex_color, linewidths=0.5)
+
+# Then plot the 3 taus
+# plt.contour(lamp, lams, tau_i, [0], color= 'r', linewidths=2)
+# plt.contour(lamp, lams, tau_s, [0], color= 'g', linewidths=2)
+# plt.contour(lamp, lams, tau_r, [0], color= 'b', linewidths=2)
 
 
 plt.title('Contour plot of Phase Mismatch (DK_TE)')

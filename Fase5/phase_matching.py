@@ -79,12 +79,12 @@ def compute_k_l(path):
 
     # change to dK/dw
     c = 3e8
-    kd_dw = - (LAMP ** 2 )/(2*np.pi*c) * k_prime_p
+    kp_dw = - (LAMP ** 2 )/(2*np.pi*c) * k_prime_p
     ks_dw = - (LAMS ** 2 )/(2*np.pi*c) * k_prime_s
     ki_dw = - (LAMI ** 2 )/(2*np.pi*c) * k_prime_i
 
-    tau_s = kd_dw - ks_dw
-    tau_i = kd_dw - ki_dw
+    tau_s = kp_dw - ks_dw
+    tau_i = kp_dw - ki_dw
 
 
     # # Pade approximation for each field
@@ -124,6 +124,7 @@ DK_TE.shape, DK_TE[1000, 1000]
 plt.figure(figsize=(10, 8))
 plt.contour(lamp, lams, DK_TE, [0], colors='b', linewidths=2)
 plt.contour(lamp, lams, tau_i, [0], color= 'r', linewidths=2)
+plt.contour(lamp, lams, tau_s, [0], color= 'g', linewidths=2)
 plt.title('Contour plot of Phase Mismatch (DK_TE)')
 plt.xlabel('lamp')
 plt.ylabel('lams')
