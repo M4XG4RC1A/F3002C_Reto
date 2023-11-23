@@ -53,15 +53,15 @@ path = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide727778_1000000_1
 
 neff_values, lambda_values = load_data_from_mat(path)
 
-"""  CIERRA LOS OJOS MAX NO VEAS ESTO   """
+# """  CIERRA LOS OJOS MAX NO VEAS ESTO   """
 
-neff_df = pd.read_csv('/home/jay/Downloads/NeffP12.csv')
-filtered_rows = neff_df[~neff_df.isin([333, 555]).any(axis=1)]
-neffLimpio = filtered_rows.copy()
-Neff_limpio = neffLimpio.values
-lambda_values = np.array(neffLimpio.columns, dtype=float)
-Neff_limpio, lambda_values
-neff_values = Neff_limpio[0]
+# neff_df = pd.read_csv('/home/jay/Downloads/NeffP12.csv')
+# filtered_rows = neff_df[~neff_df.isin([333, 555]).any(axis=1)]
+# neffLimpio = filtered_rows.copy()
+# Neff_limpio = neffLimpio.values
+# lambda_values = np.array(neffLimpio.columns, dtype=float)
+# Neff_limpio, lambda_values
+# neff_values = Neff_limpio[0]
 
 # Fit polynomial
 coefficients = fit_polynomial(lambda_values, neff_values)
@@ -111,10 +111,10 @@ plot_contour(lamp, lams, DK_TE, path)
 
 
 
-L = 0.03e6 # in mm
+L = 0.09e6 # in mm
 SIGMA = 3e12
 L0 = 0.833
-L0 = 0.648
+L0 = 0.649
 NL = 0
 print(L0)
 

@@ -108,7 +108,7 @@ pathTE = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide727778_1000000
 
 pathTE = 'Fase4/Sweep/Matlab/Waveguide1000000_750000_1580_Mode3.mat'
 
-
+path = '/home/jay/repos/F3002C_Reto/Fase4/Sweep/Matlab/Waveguide727778_1000000_1580_Mode3.mat'
 
 #pathTM = '/home/jay/repos/F3001C_Reto/CodigoFinal/Modos/Modes/TM/Waveguide1000_325_1555.mat'
 
@@ -144,10 +144,10 @@ for i in range(int(0),int(n/16),1):
     # Here's your plotting line with the new color:
     plt.contour(lamp, lams, DK_3d[:, slice_index, :], [0], colors=hex_color, linewidths=0.5)
 
-# Then plot the 3 taus
-# plt.contour(lamp, lams, tau_i, [0], color= 'r', linewidths=2)
-# plt.contour(lamp, lams, tau_s, [0], color= 'g', linewidths=2)
-# plt.contour(lamp, lams, tau_r, [0], color= 'b', linewidths=2)
+    # Then plot the 3 taus
+    plt.contour(lamp, lams, tau_i[:, slice_index, :], [0], color= 'r', linewidths=2)
+    plt.contour(lamp, lams, tau_s[:, slice_index, :], [0], color= 'g', linewidths=2)
+    plt.contour(lamp, lams, tau_r[:, slice_index, :], [0], color= 'b', linewidths=2)
 
 
 plt.title('Contour plot of Phase Mismatch (DK_TE)')
