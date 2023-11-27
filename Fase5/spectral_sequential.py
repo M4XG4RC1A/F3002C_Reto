@@ -111,8 +111,8 @@ plot_contour(lamp, lams, DK_TE, path)
 
 
 
-L = 0.09e6 # in mm
-SIGMA = 3e12
+L = 0.2e6 # in mm
+SIGMA = 0.01e12
 L0 = 0.833
 L0 = 0.649
 NL = 0
